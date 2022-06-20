@@ -49,6 +49,8 @@ def get_subcategories(category: str):
     :param category:
     :return: string list
     """
+    global count
+
     params = {
         "action": "query",
         "cmtitle": category if category.startswith("Category:") else "Category:" + category,
@@ -59,8 +61,10 @@ def get_subcategories(category: str):
     }
     data = mediawiki_request(params).json()
     for cm in data["query"]["categorymembers"]:
-        yield cm["title"].split(":")[1]
-
+        cat = cm["title"].split(":")[1]
+        print(count, cat)
+        count += 1
+        yield cat
 
 def recurse_sc_tree(category: str, depth: int, parent_node: Node):
     """
@@ -70,16 +74,12 @@ def recurse_sc_tree(category: str, depth: int, parent_node: Node):
     :param parent_node: current parent node
     :return:
     """
-    global count
-
     # base case
     if depth < 0:
         return
 
     # call query
     subcategories = get_subcategories(category)
-    print(count, category)
-    count += 1
     for sc in subcategories:
         child_node = Node(sc, parent=parent_node)
         recurse_sc_tree(sc, depth - 1, child_node)
